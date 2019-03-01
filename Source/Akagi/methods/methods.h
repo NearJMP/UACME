@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2014 - 2018
+*  (C) COPYRIGHT AUTHORS, 2014 - 2019
 *
 *  TITLE:       METHODS.H
 *
-*  VERSION:     3.00
+*  VERSION:     3.15
 *
-*  DATE:        27 Aug 2018
+*  DATE:        15 Feb 2019
 *
 *  Prototypes and definitions for UAC bypass methods table.
 *
@@ -19,59 +19,64 @@
 #pragma once
 
 typedef enum _UCM_METHOD {
-    UacMethodTest = 0,      //+
-    UacMethodSysprep1 = 1,  //+
-    UacMethodSysprep2,      //+
-    UacMethodOobe,          //+
-    UacMethodRedirectExe,   //+
-    UacMethodSimda,         //+
-    UacMethodCarberp1,      //+
-    UacMethodCarberp2,      //+
-    UacMethodTilon,         //+
-    UacMethodAVrf,          //+
-    UacMethodWinsat,        //+
-    UacMethodShimPatch,     //+
-    UacMethodSysprep3,      //+
-    UacMethodMMC1,          //+
-    UacMethodSirefef,       //+
-    UacMethodGeneric,       //+
-    UacMethodGWX,           //+
-    UacMethodSysprep4,      //+
-    UacMethodManifest,      //+
-    UacMethodInetMgr,       //+
-    UacMethodMMC2,          //+
-    UacMethodSXS,           //+
-    UacMethodSXSConsent,    //+
-    UacMethodDISM,          //+
-    UacMethodComet,         //+
-    UacMethodEnigma0x3,     //+
-    UacMethodEnigma0x3_2,   //+
-    UacMethodExpLife,       //+
-    UacMethodSandworm,      //+
-    UacMethodEnigma0x3_3,   //+
-    UacMethodWow64Logger,   //+
-    UacMethodEnigma0x3_4,   //+
-    UacMethodUiAccess,      //+
-    UacMethodMsSettings,    //+
-    UacMethodTyranid,       //+
-    UacMethodTokenMod,      //+
-    UacMethodJunction,      //+
-    UacMethodSXSDccw,       //+
-    UacMethodHakril,        //+
-    UacMethodCorProfiler,   //+
-    UacMethodCOMHandlers,   //+
-    UacMethodCMLuaUtil,     //+
-    UacMethodFwCplLua,      //+
-    UacMethodDccwCOM,       //+
-    UacMethodVolatileEnv,   //+
-    UacMethodSluiHijack,    //+
-    UacMethodBitlockerRC,   //+
-    UacMethodCOMHandlers2,  //+
-    UacMethodSPPLUAObject,  //+
-    UacMethodCreateNewLink, //+
-    UacMethodDateTimeWriter,//+
-    UacMethodAcCplAdmin,    //+
-    UacMethodMax
+    UacMethodTest = 0,          //+
+    UacMethodSysprep1 = 1,      //+
+    UacMethodSysprep2,          //+
+    UacMethodOobe,              //+
+    UacMethodRedirectExe,       //+
+    UacMethodSimda,             //+
+    UacMethodCarberp1,          //+
+    UacMethodCarberp2,          //+
+    UacMethodTilon,             //+
+    UacMethodAVrf,              //+
+    UacMethodWinsat,            //+
+    UacMethodShimPatch,         //+
+    UacMethodSysprep3,          //+
+    UacMethodMMC1,              //+
+    UacMethodSirefef,           //+
+    UacMethodGeneric,           //+
+    UacMethodGWX,               //+
+    UacMethodSysprep4,          //+
+    UacMethodManifest,          //+
+    UacMethodInetMgr,           //+
+    UacMethodMMC2,              //+
+    UacMethodSXS,               //+
+    UacMethodSXSConsent,        //+
+    UacMethodDISM,              //+
+    UacMethodComet,             //+
+    UacMethodEnigma0x3,         //+
+    UacMethodEnigma0x3_2,       //+
+    UacMethodExpLife,           //+
+    UacMethodSandworm,          //+
+    UacMethodEnigma0x3_3,       //+
+    UacMethodWow64Logger,       //+
+    UacMethodEnigma0x3_4,       //+
+    UacMethodUiAccess,          //+
+    UacMethodMsSettings,        //+
+    UacMethodTyranid,           //+
+    UacMethodTokenMod,          //+
+    UacMethodJunction,          //+
+    UacMethodSXSDccw,           //+
+    UacMethodHakril,            //+
+    UacMethodCorProfiler,       //+
+    UacMethodCOMHandlers,       //+
+    UacMethodCMLuaUtil,         //+
+    UacMethodFwCplLua,          //+
+    UacMethodDccwCOM,           //+
+    UacMethodVolatileEnv,       //+
+    UacMethodSluiHijack,        //+
+    UacMethodBitlockerRC,       //+
+    UacMethodCOMHandlers2,      //+
+    UacMethodSPPLUAObject,      //+
+    UacMethodCreateNewLink,     //+
+    UacMethodDateTimeWriter,    //+
+    UacMethodAcCplAdmin,        //+
+    UacMethodDirectoryMock,     //+
+    UacMethodCOMSdclt,          //+
+    UacMethodEgre55,            //+
+    UacMethodTokenModUiAccess,  //+
+    UacMethodMax,
+    UacMethodInvalid = 0xabcdef
 } UCM_METHOD;
 
 #define UCM_DISPATCH_ENTRY_MAX UacMethodMax
@@ -118,7 +123,7 @@ typedef struct _UCM_API_DISPATCH_ENTRY {
     ULONG PayloadResourceId;                //which payload dll must be used
     BOOL Win32OrWow64Required;
     BOOL DisallowWow64;
-    BOOL SetParametersInRegistry;           //need shared parameters to be set in the registry
+    BOOL SetParameters;                     //need shared parameters to be set
 } UCM_API_DISPATCH_ENTRY, *PUCM_API_DISPATCH_ENTRY;
 
 #include "elvint.h"
@@ -130,6 +135,7 @@ typedef struct _UCM_API_DISPATCH_ENTRY {
 #include "comet.h"
 #include "comsup.h"
 #include "deroko.h"
+#include "dwells.h"
 #include "enigma0x3.h"
 #include "explife.h"
 #include "gootkit.h"

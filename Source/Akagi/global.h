@@ -4,9 +4,9 @@
 *
 *  TITLE:       GLOBAL.H
 *
-*  VERSION:     3.00
+*  VERSION:     3.11
 *
-*  DATE:        31 Aug 2018
+*  DATE:        23 Nov 2018
 *
 *  Common header file for the program support routines.
 *
@@ -22,14 +22,7 @@
 #error ANSI build is not supported
 #endif
 
-#if (_MSC_VER >= 1900) 
-#ifdef _DEBUG
-#pragma comment(lib, "vcruntimed.lib")
-#pragma comment(lib, "ucrtd.lib")
-#else
-#pragma comment(lib, "libvcruntime.lib")
-#endif
-#endif
+#include "shared\libinc.h"
 
 //disable nonmeaningful warnings.
 #pragma warning(disable: 4005) // macro redefinition
@@ -39,6 +32,7 @@
 #pragma warning(disable: 6102) // Using %s from failed function call at line %u
 #pragma warning(disable: 6258) // Using TerminateThread does not allow proper thread clean up
 #pragma warning(disable: 6320) // exception-filter expression is the constant EXCEPTION_EXECUTE_HANDLER
+#pragma warning(disable: 6255 6263)  // alloca
 
 #define PAYLOAD_ID_NONE MAXDWORD
 #define KONGOU_IDR 0xFFFFFFFE
@@ -75,9 +69,8 @@
 #include "shared\cmdline.h"
 #include "shared\_filename.h"
 #include "shared\ldr.h"
-#include "shared\lsa.h"
 #include "shared\windefend.h"
-#include "consts.h"
+#include "shared\consts.h"
 #include "sup.h"
 #include "compress.h"
 #include "aic.h"
@@ -88,23 +81,29 @@
 //#pragma comment(lib, "libucrt.lib")
 //#include <strsafe.h>
 //
-
 //default execution flow
 #define AKAGI_FLAG_KILO  1
 
 //suppress all additional output
 #define AKAGI_FLAG_TANGO 2
 
+typedef struct _UACME_SHARED_CONTEXT {
+    HANDLE hIsolatedNamespace;
+    HANDLE hSharedSection;
+    HANDLE hCompletionEvent;
+} UACME_SHARED_CONTEXT, *PUACME_SHARED_CONTEXT;
+
 typedef struct _UACME_CONTEXT {
     BOOL                    IsWow64;
+    BOOL                    OutputToDebugger;
     ULONG                   Cookie;
     PVOID                   ucmHeap;
     pfnDecompressPayload    DecompressRoutine;
     HINSTANCE               hNtdll;
     HINSTANCE               hKernel32;
-    HINSTANCE               hOle32;
     HINSTANCE               hShell32;
     HINSTANCE               hMpClient;
+    UACME_SHARED_CONTEXT    SharedContext;
     UCM_METHOD_EXECUTE_TYPE MethodExecuteType;
     ULONG                   dwBuildNumber;
     ULONG                   AkagiFlag;
@@ -117,12 +116,30 @@ typedef struct _UACME_CONTEXT {
     WCHAR                   szDefaultPayload[MAX_PATH + 1]; //limited to MAX_PATH
 } UACMECONTEXT, *PUACMECONTEXT;
 
-typedef UINT(WINAPI *pfnEntryPoint)();
+typedef struct _UACME_PARAM_BLOCK {
+    ULONG Crc32;
+    ULONG SessionId;
+    ULONG AkagiFlag;
+    WCHAR szParameter[MAX_PATH + 1];
+    WCHAR szDesktop[MAX_PATH + 1];
+    WCHAR szWinstation[MAX_PATH + 1];
+    WCHAR szSignalObject[MAX_PATH + 1];
+} UACME_PARAM_BLOCK, *PUACME_PARAM_BLOCK;
+
+typedef UINT(WINAPI *pfnEntryPoint)(
+    _In_opt_ UCM_METHOD Method,
+    _In_reads_or_z_opt_(OptionalParameterLength) LPWSTR OptionalParameter,
+    _In_opt_ ULONG OptionalParameterLength,
+    _In_ BOOL OutputToDebugger
+    );
 
 typedef struct _UACME_THREAD_CONTEXT {
     TEB_ACTIVE_FRAME Frame;
     pfnEntryPoint ucmMain;
     DWORD ReturnedResult;
+    ULONG OptionalParameterLength;
+    LPWSTR OptionalParameter;
 } UACME_THREAD_CONTEXT, *PUACME_THREAD_CONTEXT;
 
-extern UACMECONTEXT g_ctx;
+extern PUACMECONTEXT g_ctx;
+extern HINSTANCE g_hInstance;

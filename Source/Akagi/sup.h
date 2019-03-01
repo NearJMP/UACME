@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2014 - 2018
+*  (C) COPYRIGHT AUTHORS, 2014 - 2019
 *
 *  TITLE:       SUP.H
 *
-*  VERSION:     3.00
+*  VERSION:     3.15
 *
-*  DATE:        25 Aug 2018
+*  DATE:        15 Feb 2019
 *
 *  Common header file for the program support routines.
 *
@@ -90,6 +90,12 @@ BOOL supWriteBufferToFile(
     _In_ PVOID Buffer,
     _In_ DWORD BufferSize);
 
+BOOL supDecodeAndWriteBufferToFile(
+    _In_ LPWSTR lpFileName,
+    _In_ CONST PVOID Buffer,
+    _In_ DWORD BufferSize,
+    _In_ ULONG Key);
+
 PBYTE supReadFileToBuffer(
     _In_ LPWSTR lpFileName,
     _Inout_opt_ LPDWORD lpBufferSize);
@@ -132,13 +138,6 @@ DWORD supQueryEntryPointRVA(
 LPWSTR supQueryEnvironmentVariableOffset(
     _In_ PUNICODE_STRING Value);
 
-BOOL supSetParameter(
-    _In_ LPWSTR lpParameter,
-    _In_ DWORD cbParameter);
-
-BOOL supSaveAkagiParameters(
-    VOID);
-
 DWORD supCalculateCheckSumForMappedFile(
     _In_ PVOID BaseAddress,
     _In_ ULONG FileLength);
@@ -152,6 +151,7 @@ BOOLEAN supSetCheckSumForMappedFile(
     _In_ ULONG CheckSum);
 
 VOID ucmShowMessage(
+    _In_ BOOL OutputToDebugger,
     _In_ LPWSTR lpszMsg);
 
 INT ucmShowQuestion(
@@ -197,6 +197,11 @@ BOOL supVirtualFree(
     _In_ PVOID Memory,
     _Out_opt_ NTSTATUS *Status);
 
+BOOL supSecureVirtualFree(
+    _In_ PVOID Memory,
+    _In_ SIZE_T MemorySize,
+    _Out_opt_ NTSTATUS *Status);
+
 PVOID FORCEINLINE supHeapAlloc(
     _In_ SIZE_T Size);
 
@@ -224,9 +229,6 @@ BOOL supDeleteMountPoint(
 HANDLE supOpenDirectoryForReparse(
     _In_ LPWSTR lpDirectory);
 
-BOOL supSetupIPCLinkData(
-    VOID);
-
 BOOL supWinstationToName(
     _In_opt_ HWINSTA hWinsta,
     _In_ LPWSTR lpBuffer,
@@ -242,10 +244,11 @@ BOOL supDesktopToName(
 BOOL supQueryNtBuildNumber(
     _Inout_ PULONG BuildNumber);
 
-BOOL supConvertDllToExeSetNewEP(
-    _In_ PVOID pvImage,
-    _In_ ULONG dwImageSize,
-    _In_ LPSTR lpszEntryPoint);
+BOOL supReplaceDllEntryPoint(
+    _In_ PVOID DllImage,
+    _In_ ULONG SizeOfDllImage,
+    _In_ LPCSTR lpEntryPointName,
+    _In_ BOOL fConvertToExe);
 
 NTSTATUS supRegReadValue(
     _In_ HANDLE hKey,
@@ -256,7 +259,7 @@ NTSTATUS supRegReadValue(
     _In_opt_ HANDLE hHeap);
 
 BOOL supQuerySystemRoot(
-    VOID);
+    _Inout_ PVOID Context);
 
 PVOID supGetSystemInfo(
     _In_ SYSTEM_INFORMATION_CLASS InfoClass);
@@ -272,11 +275,6 @@ NTSTATUS supRegSetValueIndirectHKCU(
 
 NTSTATUS supRemoveRegLinkHKCU(
     VOID);
-
-BOOL supExecuteWithDelay(
-    _In_ ULONG Milliseconds,
-    _In_opt_ PTIMER_APC_ROUTINE CompletionRoutine,
-    _In_opt_ PVOID CompletionParameter);
 
 BOOL supIsConsentApprovedInterface(
     _In_ LPWSTR InterfaceName,
@@ -304,6 +302,28 @@ PVOID supEncodePointer(
 
 PVOID supDecodePointer(
     _In_ PVOID Pointer);
+
+NTSTATUS supCreateDirectory(
+    _Out_opt_ PHANDLE phDirectory,
+    _In_ OBJECT_ATTRIBUTES *ObjectAttributes,
+    _In_ ULONG DirectoryShareFlags,
+    _In_ ULONG DirectoryAttributes);
+
+BOOL supCreateSharedParametersBlock(
+    _In_ PVOID ucmContext);
+
+VOID supDestroySharedParametersBlock(
+    _In_ PVOID ucmContext);
+
+PVOID supCreateUacmeContext(
+    _In_ ULONG Method,
+    _In_reads_or_z_opt_(OptionalParameterLength) LPWSTR OptionalParameter,
+    _In_ ULONG OptionalParameterLength,
+    _In_ PVOID DecompressRoutine,
+    _In_ BOOL OutputToDebugger);
+
+VOID supDestroyUacmeContext(
+    _In_ PVOID Context);
 
 #ifdef _DEBUG
 #define supDbgMsg(Message)  OutputDebugString(Message)

@@ -9,19 +9,21 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>22</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseInternal|x64'">
-    <LocalDebuggerCommandArguments>22</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>14</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>55 c:\windows\system32\charmap.exe</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>14</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>55 c:\windows\system32\charmap.exe</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

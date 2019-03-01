@@ -4,9 +4,9 @@
 *
 *  TITLE:       COMPRESS.C
 *
-*  VERSION:     3.00
+*  VERSION:     3.10
 *
-*  DATE:        02 Sep 2018
+*  DATE:        21 Nov 2018
 *
 *  Compression support.
 *
@@ -40,8 +40,9 @@ typedef struct _DCK_HEADER {
 *
 */
 VOID EncodeBuffer(
-    PVOID Buffer,
-    ULONG BufferSize
+    _In_ PVOID Buffer,
+    _In_ ULONG BufferSize,
+    _In_ ULONG Key
 )
 {
     ULONG k, c;
@@ -50,9 +51,9 @@ VOID EncodeBuffer(
     if ((Buffer == NULL) || (BufferSize == 0))
         return;
 
-    k = AKAGI_XOR_KEY;
+    k = Key;
     c = BufferSize;
-    ptr = Buffer;
+    ptr = (PUCHAR)Buffer;
 
     do {
         *ptr ^= k;
@@ -89,7 +90,7 @@ PVOID SelectSecretFromBlob(
     }
 
     RtlCopyMemory(P, g_bSecrets, c);
-    EncodeBuffer(P, c);
+    EncodeBuffer(P, c, AKAGI_XOR_KEY);
 
     c = sizeof(g_bSecrets) / sizeof(DCK_HEADER);
     for (i = 0; i < c; i++) {
@@ -218,7 +219,7 @@ BOOL DecryptBuffer(
             break;
         }
 
-        pbKeyObject = HeapAlloc(heapCNG, HEAP_ZERO_MEMORY, cbKeyObject);
+        pbKeyObject = (PBYTE)HeapAlloc(heapCNG, HEAP_ZERO_MEMORY, cbKeyObject);
         if (pbKeyObject == NULL)
             break;
 
@@ -267,7 +268,7 @@ BOOL DecryptBuffer(
 
         memIO = (SIZE_T)cbCipherData;
 
-        pbCipherData = supVirtualAlloc(
+        pbCipherData = (PBYTE)supVirtualAlloc(
             &memIO,
             DEFAULT_ALLOCATION_TYPE,
             DEFAULT_PROTECT_TYPE,
@@ -334,7 +335,7 @@ PVOID DecompressContainerUnit(
     _In_ DWORD cbBuffer,
     _In_ PBYTE pbSecret,
     _In_ DWORD cbSecret,
-    _Out_ PDWORD pcbDecompressed
+    _Out_ PULONG pcbDecompressed
 )
 {
     BOOL            bCond = FALSE;
@@ -469,12 +470,12 @@ PVOID DecompressPayload(
             //
             // Get key for decryption.
             //
-            pbSecret = SelectSecretFromBlob(PayloadId, &cbSecret);
+            pbSecret = (PBYTE)SelectSecretFromBlob(PayloadId, &cbSecret);
             if ((pbSecret == NULL) || (cbSecret == 0))
                 break;
 
-            UncompressedData = DecompressContainerUnit(
-                Data,
+            UncompressedData = (PUCHAR)DecompressContainerUnit(
+                (PBYTE)Data,
                 DataSize,
                 pbSecret,
                 cbSecret,
@@ -715,8 +716,10 @@ BOOL ProcessFileDCS(
     PDCS_HEADER FileHeader = (PDCS_HEADER)SourceFile;
     PDCS_BLOCK Block;
 
+    SIZE_T BytesRead;
+
     DWORD NumberOfBlocks = 0;
-    DWORD BytesRead, BytesDecompressed, NextOffset;
+    DWORD BytesDecompressed, NextOffset;
 
     if ((SourceFile == NULL) ||
         (OutputFileBuffer == NULL) ||
@@ -740,7 +743,7 @@ BOOL ProcessFileDCS(
         if (FileHeader->NumberOfBlocks == 0)
             break;
 
-        DataBuffer = supHeapAlloc(FileHeader->UncompressedFileSize);
+        DataBuffer = (PBYTE)supHeapAlloc(FileHeader->UncompressedFileSize);
         if (DataBuffer == NULL)
             break;
 
@@ -804,7 +807,7 @@ BOOL InitCabinetDecompressionAPI(
     VOID
 )
 {
-    HANDLE hCabinetDll;
+    HMODULE hCabinetDll;
 
     hCabinetDll = GetModuleHandle(TEXT("cabinet.dll"));
     if (hCabinetDll == NULL)

